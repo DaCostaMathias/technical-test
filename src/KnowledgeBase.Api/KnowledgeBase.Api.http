@@ -1,0 +1,34 @@
+@KnowledgeBase.Api_HostAddress = https://localhost:7180
+@BearerToken = YOUR_ACCESS_TOKEN_HERE
+
+### 1. Create Article
+POST {{KnowledgeBase.Api_HostAddress}}/api/articles
+Authorization: Bearer {{BearerToken}}
+Content-Type: application/json
+
+{
+  "title": "Clean Architecture in ASP.NET Core",
+  "content": "A comprehensive guide on structuring enterprise .NET applications with pragmatic scope boundaries.",
+  "tags": [
+    "csharp",
+    "dotnet",
+    "architecture"
+  ],
+  "categoryId": null
+}
+
+### 2. Get Article By ID
+@articleId = 00000000-0000-0000-0000-000000000000
+GET {{KnowledgeBase.Api_HostAddress}}/api/articles/{{articleId}}
+Authorization: Bearer {{BearerToken}}
+Accept: application/json
+
+### 3. Search Articles
+GET {{KnowledgeBase.Api_HostAddress}}/api/articles?search=csharp&category=Architecture&page=1&pageSize=20
+Authorization: Bearer {{BearerToken}}
+Accept: application/json
+
+### 4. Upvote Article
+POST {{KnowledgeBase.Api_HostAddress}}/api/articles/{{articleId}}/upvote
+Authorization: Bearer {{BearerToken}}
+Accept: application/json

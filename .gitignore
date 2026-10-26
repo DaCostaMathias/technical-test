@@ -1,0 +1,133 @@
+# ==============================================================================
+# .gitignore for KnowledgeBase .NET 10 Solution
+# Tailored for C#, ASP.NET Core, EF Core, Visual Studio, VS Code & Rider
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Build outputs & intermediate files
+# ------------------------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+GeneratedFiles/
+dist/
+
+# Output directories for generic build architectures
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Dd]ebug/
+[Rr]elease/
+
+# MSBuild & Roslyn temporary files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.lock.json
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+
+# ------------------------------------------------------------------------------
+# Visual Studio
+# ------------------------------------------------------------------------------
+.vs/
+.cr/
+*.swp
+*.vsidx
+*.vssscc
+*.VC.db
+*.VC.opendb
+UpgradeLog.htm
+UpgradeLog.XML
+
+# Visual Studio test & profiling files
+TestResult*/
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
+*.opencover.xml
+
+# ------------------------------------------------------------------------------
+# JetBrains Rider & ReSharper
+# ------------------------------------------------------------------------------
+.idea/
+*.sln.iml
+_ReSharper*/
+*.ReSharper
+*.ReSharper.user
+*.DotSettings.user
+
+# ------------------------------------------------------------------------------
+# Visual Studio Code
+# ------------------------------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+*.code-workspace
+
+# ------------------------------------------------------------------------------
+# Environment variables, sensitive files & local settings
+# ------------------------------------------------------------------------------
+*.env
+*.env.*
+!.env.example
+!.env.template
+
+# Local appsettings overrides (keep base appsettings.json and appsettings.Development.json)
+appsettings*.local.json
+appsettings.Production.json
+secrets.json
+
+# .NET User Secrets folder reference (fallback pattern)
+# Secrets are normally stored under %APPDATA%\Microsoft\UserSecrets\<userSecretsId>\secrets.json
+
+# ------------------------------------------------------------------------------
+# NuGet packages & publishing artifacts
+# ------------------------------------------------------------------------------
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# ------------------------------------------------------------------------------
+# Database & Local Storage
+# ------------------------------------------------------------------------------
+*.mdf
+*.ldf
+*.ndf
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ------------------------------------------------------------------------------
+# Operating System files
+# ------------------------------------------------------------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Linux
+*~
+.directory
