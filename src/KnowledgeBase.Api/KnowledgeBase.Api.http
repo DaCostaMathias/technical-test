@@ -1,4 +1,4 @@
-@KnowledgeBase.Api_HostAddress = https://localhost:7180
+@KnowledgeBase.Api_HostAddress = https://localhost:7282
 @BearerToken = YOUR_ACCESS_TOKEN_HERE
 
 ### 1. Create Article

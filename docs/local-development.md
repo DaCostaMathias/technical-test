@@ -99,27 +99,20 @@ The committed `src/KnowledgeBase.Api/appsettings.json` contains placeholders rat
   },
   "Logging": {
     "LogLevel": {
-      "Default": "Debug",
-      "Microsoft.AspNetCore": "Information",
-      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
     }
   }
 }
 ```
 
-`Authentication:UseLocalJwt` enables locally issued development JWTs when running in the `Development` environment, enabling complete manual API testing without requiring a live Microsoft Entra ID tenant.
+`Authentication:UseLocalJwt` enables locally issued development JWTs when running in the `Development` environment, allowing manual API testing without requiring a live Microsoft Entra ID tenant.
 
 ---
 
 ## 3. Local Secrets Management
 
-Use .NET Secret Manager for sensitive local values.
-
-Initialise user secrets for the API project if not already set:
-
-```bash
-dotnet user-secrets init --project src/KnowledgeBase.Api
-```
+`src/KnowledgeBase.Api/KnowledgeBase.Api.csproj` includes a committed `<UserSecretsId>`, so `dotnet user-secrets set` and `dotnet user-jwts create` work directly without running `dotnet user-secrets init` or modifying the project file.
 
 ### SQL Server Connection String
 
@@ -213,6 +206,9 @@ dotnet ef migrations list \
   --startup-project src/KnowledgeBase.Api
 ```
 
+> [!NOTE]
+> Categories are not seeded by the migration and there is no category-management endpoint. Set `categoryId` to `null` for manual article creation unless a category row has been inserted directly into SQL.
+
 ---
 
 ## 6. Authentication Setup
@@ -242,6 +238,7 @@ if (useLocalJwt)
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme);
+    builder.Services.AddRequiredScopeAuthorization();
 }
 else
 {
@@ -257,4 +254,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-Local JWT mode validates tokens through the ASP.NET Core JWT Bearer handler without bypassing `[Authorize]`, scope checks, or GUID object ID requirements.
+Local JWT mode enforces:
+- `[Authorize]`
+- `[RequiredScope("access_as_user")]`
+- Valid GUID `oid` resolution through `ICurrentUser` for endpoints that access `ICurrentUser.UserId`
+
+---
+
+## 7. Running the API Locally
+
+`src/KnowledgeBase.Api/Properties/launchSettings.json` defines two launch profiles (both with `ASPNETCORE_ENVIRONMENT=Development`):
+
+- **HTTP profile (`http`)**: `http://localhost:5180`
+- **HTTPS profile (`https`)**: `https://localhost:7282` (and `http://localhost:5180`)
+
+When testing over HTTPS, specify the `https` launch profile explicitly:
+
+```bash
+dotnet run --project src/KnowledgeBase.Api --launch-profile https
+```

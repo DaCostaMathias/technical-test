@@ -43,6 +43,7 @@ Generate a test bearer token with the required `access_as_user` scope and a vali
 dotnet user-jwts create `
   --project src/KnowledgeBase.Api `
   --scope access_as_user `
+  --claim "scp=access_as_user" `
   --claim "oid=11111111-1111-1111-1111-111111111111" `
   --valid-for 8h
 ```
@@ -52,12 +53,13 @@ dotnet user-jwts create `
 dotnet user-jwts create \
   --project src/KnowledgeBase.Api \
   --scope access_as_user \
+  --claim "scp=access_as_user" \
   --claim "oid=11111111-1111-1111-1111-111111111111" \
   --valid-for 8h
 ```
 
 > [!NOTE]
-> If your local environment maps claims differently, you can explicitly use the full schema claim:
+> `dotnet user-jwts --scope` writes the standard `"scope"` claim, whereas `Microsoft.Identity.Web`'s `[RequiredScope]` handler evaluates Entra's `"scp"` (or `"http://schemas.microsoft.com/identity/claims/scope"`) claim. Passing `--claim "scp=access_as_user"` ensures the local token matches the Entra scope claim shape. If your local environment maps object ID claims differently, you can also explicitly pass:
 > `--claim "http://schemas.microsoft.com/identity/claims/objectidentifier=11111111-1111-1111-1111-111111111111"`
 
 To inspect or list generated tokens:
@@ -71,13 +73,13 @@ dotnet user-jwts print <TOKEN_ID> --project src/KnowledgeBase.Api
 
 ## Step 2: Start the API
 
-Start the Web API from the repository root:
+Start the Web API from the repository root using the `https` launch profile:
 
 ```bash
-dotnet run --project src/KnowledgeBase.Api
+dotnet run --project src/KnowledgeBase.Api --launch-profile https
 ```
 
-Take note of the listening HTTPS port from the console output (e.g., `https://localhost:7085` or `https://localhost:5001`).
+The `https` profile listens on `https://localhost:7282` (and `http://localhost:5180`). If you run without `--launch-profile https`, the default `http` profile listens only on `http://localhost:5180`.
 
 If your development HTTPS certificate is not trusted:
 
@@ -93,7 +95,7 @@ In a PowerShell terminal, initialise your base URL and authentication header:
 
 ```powershell
 $token = "<PASTE_LOCAL_JWT>"
-$baseUrl = "https://localhost:<PORT>"
+$baseUrl = "https://localhost:7282"
 
 $headers = @{
   Authorization = "Bearer $token"
@@ -104,7 +106,7 @@ $headers = @{
 
 ## Step 4: Create an Article
 
-Create an article with tags and content:
+Create an article with tags and content. Keep `categoryId` set to `$null` unless a category row has been inserted manually into the `Categories` table (categories are not seeded and there is no category-management endpoint):
 
 ```powershell
 $body = @{
@@ -227,6 +229,7 @@ Generate a token for a second user:
 dotnet user-jwts create `
   --project src/KnowledgeBase.Api `
   --scope access_as_user `
+  --claim "scp=access_as_user" `
   --claim "oid=22222222-2222-2222-2222-222222222222" `
   --valid-for 8h
 ```
@@ -270,18 +273,21 @@ dotnet user-jwts create `
   --valid-for 8h
 ```
 Call an endpoint with this token:
-*Expected: HTTP `403 Forbidden`.* (Validates that local JWT mode still enforces `[RequiredScope]` policies).
+*Expected: HTTP `403 Forbidden`.* (Validates that local JWT mode enforces `[RequiredScope("access_as_user")]` via `AddRequiredScopeAuthorization()`).
 
 ### Missing Object ID (`oid`)
-Generate a token with the scope but without a GUID `oid` claim:
+Generate a token with the `access_as_user` scope but without a valid GUID `oid` claim:
 ```powershell
 dotnet user-jwts create `
   --project src/KnowledgeBase.Api `
   --scope access_as_user `
+  --claim "scp=access_as_user" `
   --valid-for 8h
 ```
-Call an endpoint that accesses `ICurrentUser.UserId`:
-*Expected: Generic Problem Details indicating invalid identity contract.*
+Expected prototype behaviour:
+- `GET /api/articles` (`Search`) can succeed with HTTP `200 OK` because search does not access `ICurrentUser.UserId`.
+- `POST /api/articles` (`Create`), `GET /api/articles/{id}` (`GetById`), and `POST /api/articles/{id}/upvote` (`Upvote`) fail with a generic HTTP `500 Internal Server Error` `ProblemDetails` response when `ICurrentUser.UserId` throws `InvalidOperationException` (the response body does not expose exception details or mention the identity contract).
+- **Known prototype limitation**: `GetById` currently increments `ViewCount` in SQL before resolving the current user's upvote state via `ICurrentUser.UserId`, so a request with a missing or malformed `oid` can increment `ViewCount` before failing with HTTP `500`.
 
 ---
 

@@ -33,6 +33,7 @@ if (useLocalJwt)
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme);
+    builder.Services.AddRequiredScopeAuthorization();
 }
 else
 {
